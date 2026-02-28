@@ -24,8 +24,15 @@ Every character in the game is an AI agent built on a lightweight framework:
 
 - **The town** — A single village serves as the heart of the game. You build relationships here, watch it change, and always come back to it.
 - **The guild hall** — A central quest board offers missions. Some quests keep you in town. Others send you far away for long stretches of time.
-- **NPC life progression** — While you're away, characters age, form relationships, have families, change economic status, and die. The world simulates forward.
-- **Quests drive time** — Longer quests create the passage of time, giving the town room to evolve between your returns.
+- **Preparation phase** — Before heading out on an adventure, you have objectives to accomplish in town to prepare. These interactions with townspeople set the stage for your journey and establish stakes.
+- **Adventures vary in length** — Some quests are short errands, others are long expeditions. The longer you're gone, the more the town changes when you return.
+- **NPC life progression** — While you're away, characters age, form relationships, have families, change economic status, and die. The world simulates forward proportionally to how long you've been gone.
+
+### Morality and Consequences
+
+- **Moral choices** — Objectives weave morality into your decisions. How you prepare, who you help or exploit, and the methods you use all carry weight.
+- **NPCs judge your actions** — When you return, townspeople react to what you did and how you did it. Completed the quest but burned bridges along the way? They know. Took the noble path at personal cost? They respect that.
+- **Adventure outcomes matter** — It's not just whether you succeeded — it's how it went. NPCs form opinions based on the full picture of your conduct, not just the result.
 
 ### Relationships and Recurrence
 
