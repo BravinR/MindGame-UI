@@ -417,8 +417,8 @@ export default function App() {
       requestAnimationFrame(animate);
 
       // Movement
-      if (keys.current['w'] || keys.current['arrowup']) warrior.translateZ(moveSpeed);
-      if (keys.current['s'] || keys.current['arrowdown']) warrior.translateZ(-moveSpeed);
+      if (keys.current['s'] || keys.current['arrowdown']) warrior.translateZ(moveSpeed);
+      if (keys.current['w'] || keys.current['arrowup']) warrior.translateZ(-moveSpeed);
       if (keys.current['a'] || keys.current['arrowleft']) warrior.rotation.y += rotateSpeed;
       if (keys.current['d'] || keys.current['arrowright']) warrior.rotation.y -= rotateSpeed;
 
