@@ -292,7 +292,7 @@ const DialogueModal = ({ npc, onClose }: { npc: QuestNpc | null; onClose: () => 
   );
 };
 
-const ObjectivesHUD = ({ objectives }: { objectives: QuestNpc[] }) => {
+const ObjectivesHUD = ({ objectives, allComplete }: { objectives: QuestNpc[]; allComplete: boolean }) => {
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -312,6 +312,11 @@ const ObjectivesHUD = ({ objectives }: { objectives: QuestNpc[] }) => {
           </li>
         ))}
       </ul>
+      {allComplete && (
+        <div className="mt-3 pt-3 border-t border-slate-500/30 text-xs text-slate-300 tracking-widest uppercase text-center">
+          Press <span className="px-1.5 py-0.5 border border-slate-400/40 rounded bg-slate-400/20 mx-1">T</span> to advance time
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -325,6 +330,8 @@ export default function App() {
   const [nearbyQuestNpc, setNearbyQuestNpc] = useState<QuestNpc | null>(null);
   const [questNpcData, setQuestNpcData] = useState<QuestNpc[]>([]);
   const [objectives, setObjectives] = useState<QuestNpc[]>([]);
+  const [advancingTime, setAdvancingTime] = useState(false);
+  const [timeAdvanceResult, setTimeAdvanceResult] = useState<string | null>(null);
   const nearbyQuestNpcRef = useRef<QuestNpc | null>(null);
 
   useEffect(() => {
@@ -335,6 +342,38 @@ export default function App() {
         setObjectives(data.objectives);
       });
   }, []);
+
+  const allComplete = objectives.length > 0 && objectives.every(o => o.completed);
+
+  const handleAdvanceTime = () => {
+    if (!allComplete || advancingTime) return;
+    setAdvancingTime(true);
+    const years = Math.floor(Math.random() * 6) + 5; // 5–10
+    fetch('/api/advance-time', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ years }),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data: { environmentContext: string; objectives: QuestNpc[] }) => {
+        setTimeAdvanceResult(data.environmentContext);
+        setQuestNpcData(data.objectives);
+        setObjectives(data.objectives);
+      })
+      .catch(err => setTimeAdvanceResult(`Failed to advance time: ${err.message}`))
+      .finally(() => setAdvancingTime(false));
+  };
+
+  useEffect(() => {
+    const onKeyDownGlobal = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 't') handleAdvanceTime();
+    };
+    window.addEventListener('keydown', onKeyDownGlobal);
+    return () => window.removeEventListener('keydown', onKeyDownGlobal);
+  }, [allComplete, advancingTime]);
 
   useEffect(() => {
     if (!containerRef.current || questNpcData.length === 0) return;
@@ -829,7 +868,60 @@ export default function App() {
 
       <DialogueModal npc={activeDialogue} onClose={() => setActiveDialogue(null)} />
 
-      <ObjectivesHUD objectives={objectives} />
+      <ObjectivesHUD objectives={objectives} allComplete={allComplete} />
+
+      {/* Advancing time overlay */}
+      <AnimatePresence>
+        {advancingTime && (
+          <motion.div
+            key="advancing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md"
+          >
+            <p className="font-display text-2xl tracking-widest text-slate-100 animate-pulse">
+              TIME IS PASSING…
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Time advance narrative modal */}
+      <AnimatePresence>
+        {timeAdvanceResult && (
+          <motion.div
+            key="time-result"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md"
+            onClick={() => setTimeAdvanceResult(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="glass-panel max-w-xl w-full p-8 rounded-2xl relative border-slate-500/40"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent rounded-t-2xl" />
+              <h2 className="font-display text-2xl text-slate-50 mb-4 tracking-widest uppercase">
+                Years Have Passed
+              </h2>
+              <p className="text-slate-100/90 font-serif leading-relaxed text-sm">
+                {timeAdvanceResult}
+              </p>
+              <button
+                onClick={() => setTimeAdvanceResult(null)}
+                className="mt-6 w-full py-3 bg-slate-700/40 hover:bg-slate-700/60 border border-slate-400/50 text-slate-50 font-display tracking-widest transition-all rounded-lg shadow-lg"
+              >
+                CONTINUE
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Cold Vignette effect */}
       <div
