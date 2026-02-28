@@ -13,6 +13,13 @@
       "position": { "x": 25, "z": -15 },
       "completed": false,
       "dialogue": "Ah, a Dragonborn! The roads have been treacherous lately. Glad you made it through."
+    },
+    {
+      "npcId": "mira-coldwell",
+      "npcName": "Mira Coldwell",
+      "position": { "x": -10, "z": -55 },
+      "completed": false,
+      "dialogue": "The temple stands as it always has — cold stone, older than memory. I come here to think."
     }
   ]
 }

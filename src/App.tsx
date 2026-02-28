@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Info, Map as MapIcon, Wind, Compass, Landmark, History, Move, Users, Sun, Sword, Snowflake, Mountain } from 'lucide-react';
 import sceneConfig from './sceneConfig.json';
-import statesConfig from './states.json';
+
 
 // --- Icon Mapping ---
 const IconMap: { [key: string]: React.ElementType } = {
@@ -162,7 +162,59 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   );
 };
 
+type Message = { from: 'player' | 'npc'; text: string };
+
+const CHAT_API = '/api/chat';
+
 const DialogueModal = ({ npc, onClose }: { npc: QuestNpc | null; onClose: () => void }) => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputText, setInputText] = useState('');
+  const [conversationEnded, setConversationEnded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const sendMessage = async (currentNpc: QuestNpc, playerMessage: string) => {
+    setIsLoading(true);
+    setMessages(prev => [...prev, { from: 'player', text: playerMessage }]);
+    try {
+      const res = await fetch(CHAT_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ npcId: currentNpc.npcId, playerMessage }),
+      });
+      const data = await res.json();
+      setMessages(prev => [...prev, { from: 'npc', text: data.npcResponse }]);
+      setConversationEnded(data.conversationEnded);
+    } catch {
+      setMessages(prev => [...prev, { from: 'npc', text: '(No response.)' }]);
+      setConversationEnded(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!npc) {
+      setMessages([]);
+      setConversationEnded(false);
+      setInputText('');
+      setIsLoading(false);
+      return;
+    }
+    sendMessage(npc, `Hey ${npc.npcName}, what have you been up to?`);
+  }, [npc]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSend = () => {
+    if (!npc || !inputText.trim() || isLoading) return;
+    const msg = inputText.trim();
+    setInputText('');
+    sendMessage(npc, msg);
+  };
+
   return (
     <AnimatePresence>
       {npc && (
@@ -181,14 +233,58 @@ const DialogueModal = ({ npc, onClose }: { npc: QuestNpc | null; onClose: () => 
             onClick={e => e.stopPropagation()}
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent rounded-t-2xl" />
-            <h2 className="font-display text-xl text-slate-50 mb-3 tracking-widest uppercase">{npc.npcName}</h2>
-            <p className="text-slate-100/90 font-serif leading-relaxed text-sm">{npc.dialogue}</p>
-            <button
-              onClick={onClose}
-              className="mt-5 w-full py-2.5 bg-slate-700/40 hover:bg-slate-700/60 border border-slate-400/50 text-slate-50 font-display tracking-widest transition-all rounded-lg shadow-lg text-sm"
-            >
-              FAREWELL
-            </button>
+            <h2 className="font-display text-xl text-slate-50 mb-4 tracking-widest uppercase">{npc.npcName}</h2>
+
+            {/* Chat messages */}
+            <div className="space-y-2 max-h-56 overflow-y-auto mb-4 pr-1">
+              {messages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.from === 'player' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] px-3 py-2 rounded-lg text-sm font-serif leading-relaxed ${
+                    msg.from === 'player'
+                      ? 'bg-slate-500/30 text-slate-100/90'
+                      : 'bg-slate-700/50 text-slate-100/90'
+                  }`}>
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-slate-700/50 px-3 py-2 rounded-lg text-slate-400 text-sm tracking-widest">...</div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input or Farewell */}
+            {conversationEnded ? (
+              <button
+                onClick={onClose}
+                className="w-full py-2.5 bg-slate-700/40 hover:bg-slate-700/60 border border-slate-400/50 text-slate-50 font-display tracking-widest transition-all rounded-lg shadow-lg text-sm"
+              >
+                FAREWELL
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={inputText}
+                  onChange={e => setInputText(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSend()}
+                  placeholder="Say something..."
+                  disabled={isLoading}
+                  autoFocus
+                  className="flex-1 bg-slate-700/30 border border-slate-500/40 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-slate-400/60 disabled:opacity-50"
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={isLoading || !inputText.trim()}
+                  className="px-4 py-2 bg-slate-700/40 hover:bg-slate-700/60 border border-slate-400/50 text-slate-50 font-display tracking-widest transition-all rounded-lg text-sm disabled:opacity-40"
+                >
+                  SEND
+                </button>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}
@@ -227,16 +323,23 @@ export default function App() {
 
   const [activeDialogue, setActiveDialogue] = useState<QuestNpc | null>(null);
   const [nearbyQuestNpc, setNearbyQuestNpc] = useState<QuestNpc | null>(null);
-  const [objectives, setObjectives] = useState<QuestNpc[]>(
-    statesConfig.objectives as QuestNpc[]
-  );
+  const [questNpcData, setQuestNpcData] = useState<QuestNpc[]>([]);
+  const [objectives, setObjectives] = useState<QuestNpc[]>([]);
   const nearbyQuestNpcRef = useRef<QuestNpc | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    fetch('/api/state')
+      .then(res => res.json())
+      .then(data => {
+        setQuestNpcData(data.objectives);
+        setObjectives(data.objectives);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current || questNpcData.length === 0) return;
 
     const { scene: sceneSettings, materials } = sceneConfig;
-    const questNpcData: QuestNpc[] = statesConfig.objectives as QuestNpc[];
 
     // --- Scene Setup ---
     const scene = new THREE.Scene();
@@ -582,12 +685,14 @@ export default function App() {
 
     // --- Input Handling ---
     const onKeyDown = (e: KeyboardEvent) => {
-      keys.current[e.key.toLowerCase()] = true;
-
       if (e.key === 'Escape') {
         setActiveDialogue(null);
         return;
       }
+
+      if (e.target instanceof HTMLInputElement) return;
+
+      keys.current[e.key.toLowerCase()] = true;
 
       if (e.key.toLowerCase() === 'e' && nearbyQuestNpcRef.current) {
         const npc = nearbyQuestNpcRef.current;
@@ -668,6 +773,7 @@ export default function App() {
     animate();
 
     // --- Resize Handler ---
+
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -684,9 +790,7 @@ export default function App() {
         containerRef.current.removeChild(renderer.domElement);
       }
     };
-  }, []);
-
-  const questNpcData: QuestNpc[] = statesConfig.objectives as QuestNpc[];
+  }, [questNpcData]);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-slate-200">
