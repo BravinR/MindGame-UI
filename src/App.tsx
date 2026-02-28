@@ -26,7 +26,7 @@ type QuestNpc = { npcId: string; npcName: string; position: { x: number; z: numb
 
 // --- Components ---
 
-const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
+const Overlay = ({ onToggleInfo, currentYear }: { onToggleInfo: () => void; currentYear: number }) => {
   const { theme } = sceneConfig;
   return (
     <div className="fixed inset-0 pointer-events-none flex flex-col justify-between p-8 z-10">
@@ -41,13 +41,22 @@ const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
             <p className="font-serif italic text-sm text-slate-300/80">{theme.subtitle}</p>
           </motion.div>
 
-          <div className="flex gap-4 pointer-events-auto">
-            <button
-              onClick={onToggleInfo}
-              className="p-3 rounded-full glass-panel hover:bg-slate-700/40 transition-colors text-slate-100/90 border-slate-500/30"
+          <div className="flex items-start gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-right"
             >
-              <Info size={20} />
-            </button>
+              <div className="text-3xl font-display text-slate-100/80 tracking-tighter">Year {currentYear}</div>
+            </motion.div>
+            <div className="pointer-events-auto">
+              <button
+                onClick={onToggleInfo}
+                className="p-3 rounded-full glass-panel hover:bg-slate-700/40 transition-colors text-slate-100/90 border-slate-500/30"
+              >
+                <Info size={20} />
+              </button>
+            </div>
           </div>
         </header>
 
@@ -332,6 +341,7 @@ export default function App() {
   const [objectives, setObjectives] = useState<QuestNpc[]>([]);
   const [advancingTime, setAdvancingTime] = useState(false);
   const [timeAdvanceResult, setTimeAdvanceResult] = useState<string | null>(null);
+  const [currentYear, setCurrentYear] = useState(() => Math.floor(Math.random() * 100) + 1);
   const nearbyQuestNpcRef = useRef<QuestNpc | null>(null);
 
   useEffect(() => {
@@ -362,6 +372,7 @@ export default function App() {
         setTimeAdvanceResult(data.environmentContext);
         setQuestNpcData(data.objectives);
         setObjectives(data.objectives);
+        setCurrentYear(prev => prev + years);
       })
       .catch(err => setTimeAdvanceResult(`Failed to advance time: ${err.message}`))
       .finally(() => setAdvancingTime(false));
@@ -835,7 +846,7 @@ export default function App() {
     <div className="relative w-full h-screen overflow-hidden bg-slate-200">
       <div ref={containerRef} className="absolute inset-0" />
 
-      <Overlay onToggleInfo={() => setShowInfo(true)} />
+      <Overlay onToggleInfo={() => setShowInfo(true)} currentYear={currentYear} />
 
       {/* Floating name tags (repositioned each frame via DOM) */}
       {questNpcData.map(npc => (
