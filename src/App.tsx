@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Info, Map as MapIcon, Wind, Compass, Landmark, History, Move, Users, Sun, Sword, Snowflake, Mountain } from 'lucide-react';
 import sceneConfig from './sceneConfig.json';
+import statesConfig from './states.json';
 
 // --- Icon Mapping ---
 const IconMap: { [key: string]: React.ElementType } = {
@@ -20,6 +21,9 @@ const IconMap: { [key: string]: React.ElementType } = {
   Mountain
 };
 
+// --- Types ---
+type QuestNpc = { npcId: string; npcName: string; position: { x: number; z: number }; dialogue: string; completed: boolean };
+
 // --- Components ---
 
 const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
@@ -27,7 +31,7 @@ const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
   return (
     <div className="fixed inset-0 pointer-events-none flex flex-col justify-between p-8 z-10">
       <header className="flex justify-between items-start">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="space-y-1"
@@ -35,9 +39,9 @@ const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
           <h1 className="font-display text-4xl tracking-widest text-slate-100 shadow-lg">{theme.title}</h1>
           <p className="font-serif italic text-sm text-slate-300/80">{theme.subtitle}</p>
         </motion.div>
-        
+
         <div className="flex gap-4 pointer-events-auto">
-          <button 
+          <button
             onClick={onToggleInfo}
             className="p-3 rounded-full glass-panel hover:bg-slate-700/40 transition-colors text-slate-100/90 border-slate-500/30"
           >
@@ -47,7 +51,7 @@ const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
       </header>
 
       <div className="flex flex-col items-center justify-center flex-1">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1 }}
@@ -68,7 +72,7 @@ const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
       </div>
 
       <footer className="flex justify-between items-end">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="glass-panel p-4 rounded-lg space-y-2 max-w-xs border-slate-500/30"
@@ -82,7 +86,7 @@ const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
           </p>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           className="text-right space-y-1"
@@ -100,14 +104,14 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md"
           onClick={onClose}
         >
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -115,7 +119,7 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
             onClick={e => e.stopPropagation()}
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
-            
+
             <div className="flex items-start gap-6">
               <div className="p-4 bg-slate-700/30 rounded-xl text-slate-200">
                 <Mountain size={32} />
@@ -127,7 +131,7 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                     <p key={i}>{p}</p>
                   ))}
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4 pt-4">
                   {infoModal.stats.map((stat, i) => {
                     const Icon = IconMap[stat.icon] || Info;
@@ -143,7 +147,7 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                   })}
                 </div>
 
-                <button 
+                <button
                   onClick={onClose}
                   className="mt-6 w-full py-3 bg-slate-700/40 hover:bg-slate-700/60 border border-slate-400/50 text-slate-50 font-display tracking-widest transition-all rounded-lg shadow-lg"
                 >
@@ -158,15 +162,81 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
   );
 };
 
+const DialogueModal = ({ npc, onClose }: { npc: QuestNpc | null; onClose: () => void }) => {
+  return (
+    <AnimatePresence>
+      {npc && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-end justify-center pb-16 px-6 bg-slate-900/40 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            className="glass-panel max-w-xl w-full p-6 rounded-2xl relative border-slate-500/40"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent rounded-t-2xl" />
+            <h2 className="font-display text-xl text-slate-50 mb-3 tracking-widest uppercase">{npc.npcName}</h2>
+            <p className="text-slate-100/90 font-serif leading-relaxed text-sm">{npc.dialogue}</p>
+            <button
+              onClick={onClose}
+              className="mt-5 w-full py-2.5 bg-slate-700/40 hover:bg-slate-700/60 border border-slate-400/50 text-slate-50 font-display tracking-widest transition-all rounded-lg shadow-lg text-sm"
+            >
+              FAREWELL
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const ObjectivesHUD = ({ objectives }: { objectives: QuestNpc[] }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="fixed bottom-8 right-8 z-10 glass-panel p-4 rounded-lg border-slate-500/30 min-w-[220px] pointer-events-none"
+    >
+      <h3 className="text-[10px] font-sans font-semibold uppercase tracking-[0.25em] text-slate-300 mb-3">Objectives</h3>
+      <ul className="space-y-2">
+        {objectives.map(obj => (
+          <li key={obj.npcId} className="flex items-start gap-2 text-xs">
+            <span className={obj.completed ? 'text-green-400 mt-0.5' : 'text-slate-400 mt-0.5'}>
+              {obj.completed ? '✓' : '○'}
+            </span>
+            <span className={obj.completed ? 'line-through text-slate-400/60' : 'text-slate-100/80'}>
+              Find and talk to {obj.npcName}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </motion.div>
+  );
+};
+
 export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showInfo, setShowInfo] = useState(false);
   const keys = useRef<{ [key: string]: boolean }>({});
 
+  const [activeDialogue, setActiveDialogue] = useState<QuestNpc | null>(null);
+  const [nearbyQuestNpc, setNearbyQuestNpc] = useState<QuestNpc | null>(null);
+  const [objectives, setObjectives] = useState<QuestNpc[]>(
+    statesConfig.objectives as QuestNpc[]
+  );
+  const nearbyQuestNpcRef = useRef<QuestNpc | null>(null);
+
   useEffect(() => {
     if (!containerRef.current) return;
 
     const { scene: sceneSettings, materials } = sceneConfig;
+    const questNpcData: QuestNpc[] = statesConfig.objectives as QuestNpc[];
 
     // --- Scene Setup ---
     const scene = new THREE.Scene();
@@ -202,7 +272,7 @@ export default function App() {
 
     // --- Ground ---
     const groundGeo = new THREE.PlaneGeometry(1000, 1000);
-    const groundMat = new THREE.MeshStandardMaterial({ 
+    const groundMat = new THREE.MeshStandardMaterial({
       color: sceneSettings.groundColor,
       roughness: 0.9,
       metalness: 0.0
@@ -303,12 +373,12 @@ export default function App() {
       const group = new THREE.Group();
       const colors = [0x4a3728, 0x2c3e50, 0x34495e, 0x7f8c8d];
       const mat = new THREE.MeshStandardMaterial({ color: colors[Math.floor(Math.random() * colors.length)] });
-      
+
       const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.4, 0.5), mat);
       body.position.y = 0.7;
       body.castShadow = true;
       group.add(body);
-      
+
       const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({ color: materials.character.skin }));
       head.position.y = 1.6;
       head.castShadow = true;
@@ -326,6 +396,15 @@ export default function App() {
       npcs.push(npc);
       npcTargets.push(new THREE.Vector3((Math.random() - 0.5) * sceneSettings.citySize, 0, (Math.random() - 0.5) * sceneSettings.citySize));
     }
+
+    // --- Quest NPCs ---
+    const questNpcObjects: { [id: string]: THREE.Group } = {};
+    questNpcData.forEach((npcData) => {
+      const npc = createNPC();
+      npc.position.set(npcData.position.x, 0, npcData.position.z);
+      scene.add(npc);
+      questNpcObjects[npcData.npcId] = npc;
+    });
 
     // --- Pine Trees ---
     const createTree = (x: number, z: number) => {
@@ -362,7 +441,7 @@ export default function App() {
 
     const stoneMat = new THREE.MeshStandardMaterial({ color: materials.buildings.stone, roughness: 0.9 });
     const woodMat = new THREE.MeshStandardMaterial({ color: materials.buildings.wood, roughness: 0.8 });
-    const roofMat = new THREE.MeshStandardMaterial({ color: materials.buildings.roof }); // Slate/Dark Thatch
+    const roofMat = new THREE.MeshStandardMaterial({ color: materials.buildings.roof });
 
     // --- Roads ---
     const roadMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 1.0 });
@@ -373,15 +452,14 @@ export default function App() {
       const distance = start.distanceTo(end);
       const roadGeo = new THREE.PlaneGeometry(road.width, distance);
       const roadMesh = new THREE.Mesh(roadGeo, roadMat);
-      
+
       const midpoint = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
       roadMesh.position.set(midpoint.x, 0.05, midpoint.z);
       roadMesh.rotation.x = -Math.PI / 2;
-      
-      // Rotate road to align with start/end
+
       const angle = Math.atan2(end.x - start.x, end.z - start.z);
       roadMesh.rotation.z = angle;
-      
+
       roadMesh.receiveShadow = true;
       scene.add(roadMesh);
     });
@@ -390,15 +468,13 @@ export default function App() {
     const createTemple = (x: number, z: number, color: string) => {
       const templeGroup = new THREE.Group();
       const tStoneMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.7 });
-      
-      // Base
+
       const base = new THREE.Mesh(new THREE.BoxGeometry(12, 2, 12), tStoneMat);
       base.position.y = 1;
       base.castShadow = true;
       base.receiveShadow = true;
       templeGroup.add(base);
 
-      // Pillars
       const pillarGeo = new THREE.CylinderGeometry(0.5, 0.5, 8, 8);
       for (let i = -1; i <= 1; i++) {
         for (let j = -1; j <= 1; j++) {
@@ -410,7 +486,6 @@ export default function App() {
         }
       }
 
-      // Roof
       const tRoof = new THREE.Mesh(new THREE.BoxGeometry(14, 2, 14), tStoneMat);
       tRoof.position.y = 10.5;
       tRoof.castShadow = true;
@@ -437,13 +512,12 @@ export default function App() {
       const h = 8 + Math.random() * 12;
       const w = 6 + Math.random() * 4;
       const d = 6 + Math.random() * 4;
-      
+
       const body = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), stoneMat);
       body.position.set(x, h / 2, z);
       body.castShadow = true;
       body.receiveShadow = true;
-      
-      // Wooden beams
+
       const beamGeo = new THREE.BoxGeometry(w + 0.2, 0.4, 0.4);
       for (let i = 0; i < 4; i++) {
         const beam = new THREE.Mesh(beamGeo, woodMat);
@@ -455,7 +529,7 @@ export default function App() {
       roof.position.set(x, h + 3, z);
       roof.rotation.y = Math.PI / 4;
       roof.castShadow = true;
-      
+
       buildingGroup.add(body, roof);
     };
 
@@ -466,35 +540,33 @@ export default function App() {
       tower.position.set(x, h / 2, z);
       tower.castShadow = true;
       tower.receiveShadow = true;
-      
+
       const top = new THREE.Mesh(new THREE.BoxGeometry(w + 1, 2, w + 1), stoneMat);
       top.position.set(x, h + 1, z);
-      
+
       buildingGroup.add(tower, top);
     };
 
     const isOnRoadOrLandmark = (x: number, z: number) => {
-      // Check roads
       for (const road of roads) {
         const start = new THREE.Vector2(road.start.x, road.start.z);
         const end = new THREE.Vector2(road.end.x, road.end.z);
         const p = new THREE.Vector2(x, z);
-        
+
         const line = new THREE.Vector2().subVectors(end, start);
         const lenSq = line.lengthSq();
         const t = Math.max(0, Math.min(1, new THREE.Vector2().subVectors(p, start).dot(line) / lenSq));
         const projection = start.clone().add(line.multiplyScalar(t));
         const dist = p.distanceTo(projection);
-        
+
         if (dist < road.width / 2 + 5) return true;
       }
-      
-      // Check landmarks
+
       for (const landmark of landmarks) {
         const dist = Math.sqrt(Math.pow(x - landmark.position.x, 2) + Math.pow(z - landmark.position.z, 2));
         if (dist < 15) return true;
       }
-      
+
       return false;
     };
 
@@ -503,13 +575,28 @@ export default function App() {
       const z = (Math.random() - 0.5) * sceneSettings.citySize;
       if (Math.sqrt(x*x + z*z) < 30) continue;
       if (isOnRoadOrLandmark(x, z)) continue;
-      
+
       if (Math.random() > 0.9) createNordicTower(x, z);
       else createNordicHouse(x, z);
     }
 
     // --- Input Handling ---
-    const onKeyDown = (e: KeyboardEvent) => { keys.current[e.key.toLowerCase()] = true; };
+    const onKeyDown = (e: KeyboardEvent) => {
+      keys.current[e.key.toLowerCase()] = true;
+
+      if (e.key === 'Escape') {
+        setActiveDialogue(null);
+        return;
+      }
+
+      if (e.key.toLowerCase() === 'e' && nearbyQuestNpcRef.current) {
+        const npc = nearbyQuestNpcRef.current;
+        setActiveDialogue(npc);
+        setObjectives(prev =>
+          prev.map(o => o.npcId === npc.npcId ? { ...o, completed: true } : o)
+        );
+      }
+    };
     const onKeyUp = (e: KeyboardEvent) => { keys.current[e.key.toLowerCase()] = false; };
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
@@ -523,8 +610,8 @@ export default function App() {
       requestAnimationFrame(animate);
 
       // Movement
-      if (keys.current['w'] || keys.current['arrowup']) warrior.translateZ(moveSpeed);
-      if (keys.current['s'] || keys.current['arrowdown']) warrior.translateZ(-moveSpeed);
+      if (keys.current['s'] || keys.current['arrowdown']) warrior.translateZ(moveSpeed);
+      if (keys.current['w'] || keys.current['arrowup']) warrior.translateZ(-moveSpeed);
       if (keys.current['a'] || keys.current['arrowleft']) warrior.rotation.y += rotateSpeed;
       if (keys.current['d'] || keys.current['arrowright']) warrior.rotation.y -= rotateSpeed;
 
@@ -545,6 +632,37 @@ export default function App() {
       camera.lookAt(warrior.position.x, warrior.position.y + 3, warrior.position.z);
 
       renderer.render(scene, camera);
+
+      // Name tag projection
+      questNpcData.forEach((npcData) => {
+        const obj = questNpcObjects[npcData.npcId];
+        if (!obj) return;
+        const pos = obj.position.clone();
+        pos.y += 4;
+        const projected = pos.project(camera);
+        const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+        const el = document.getElementById(`nametag-${npcData.npcId}`);
+        if (el) {
+          el.style.left = '0px';
+          el.style.top = '0px';
+          el.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
+          el.style.opacity = projected.z < 1 ? '1' : '0';
+        }
+      });
+
+      // Proximity detection
+      let foundNearby: QuestNpc | null = null;
+      questNpcData.forEach((npcData) => {
+        const obj = questNpcObjects[npcData.npcId];
+        if (!obj) return;
+        const dist = warrior.position.distanceTo(obj.position);
+        if (dist < 8) foundNearby = npcData;
+      });
+      if (foundNearby !== nearbyQuestNpcRef.current) {
+        nearbyQuestNpcRef.current = foundNearby;
+        setNearbyQuestNpc(foundNearby);
+      }
     };
 
     animate();
@@ -568,25 +686,58 @@ export default function App() {
     };
   }, []);
 
+  const questNpcData: QuestNpc[] = statesConfig.objectives as QuestNpc[];
+
   return (
     <div className="relative w-full h-screen overflow-hidden bg-slate-200">
       <div ref={containerRef} className="absolute inset-0" />
-      
+
       <Overlay onToggleInfo={() => setShowInfo(true)} />
-      
+
+      {/* Floating name tags (repositioned each frame via DOM) */}
+      {questNpcData.map(npc => (
+        <div
+          key={npc.npcId}
+          id={`nametag-${npc.npcId}`}
+          className="absolute pointer-events-none text-xs font-sans tracking-widest uppercase text-slate-100 glass-panel px-2 py-0.5 rounded"
+          style={{ left: 0, top: 0, transform: 'translate(-50%, -100%)', opacity: 0, transition: 'opacity 0.2s' }}
+        >
+          {npc.npcName}
+        </div>
+      ))}
+
+      {/* Press E prompt */}
+      <AnimatePresence>
+        {nearbyQuestNpc && !activeDialogue && (
+          <motion.div
+            key="press-e"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="fixed bottom-36 left-1/2 -translate-x-1/2 z-20 glass-panel px-5 py-2.5 rounded-full text-slate-100 text-xs tracking-widest uppercase font-sans border-slate-500/30 pointer-events-none"
+          >
+            Press <span className="px-1.5 py-0.5 border border-slate-400/40 rounded bg-slate-400/20 mx-1">E</span> to talk to {nearbyQuestNpc.npcName}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <InfoModal isOpen={showInfo} onClose={() => setShowInfo(false)} />
 
+      <DialogueModal npc={activeDialogue} onClose={() => setActiveDialogue(null)} />
+
+      <ObjectivesHUD objectives={objectives} />
+
       {/* Cold Vignette effect */}
-      <div 
-        className="fixed inset-0 pointer-events-none" 
+      <div
+        className="fixed inset-0 pointer-events-none"
         style={{ boxShadow: `inset 0 0 200px ${sceneConfig.vignette}` }}
       />
-      
+
       {/* Snow particles simulation (CSS) */}
       <div className="fixed inset-0 pointer-events-none" style={{ opacity: sceneConfig.particles.opacity }}>
-        <div 
-          className="absolute inset-0 animate-[pulse_5s_infinite]" 
-          style={{ 
+        <div
+          className="absolute inset-0 animate-[pulse_5s_infinite]"
+          style={{
             backgroundImage: `radial-gradient(circle at center, ${sceneConfig.particles.color} 1px, transparent 1px)`,
             backgroundSize: `${sceneConfig.particles.size} ${sceneConfig.particles.size}`
           }}
@@ -595,4 +746,3 @@ export default function App() {
     </div>
   );
 }
-

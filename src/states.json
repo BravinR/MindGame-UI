@@ -1,0 +1,18 @@
+{
+  "objectives": [
+    {
+      "npcId": "brynn-ashford",
+      "npcName": "Brynn Ashford",
+      "position": { "x": 3, "z": -15 },
+      "completed": false,
+      "dialogue": "The tundra is unforgiving, traveler. Stay close to the roads if you value your life."
+    },
+    {
+      "npcId": "john",
+      "npcName": "John",
+      "position": { "x": 25, "z": -15 },
+      "completed": false,
+      "dialogue": "Ah, a Dragonborn! The roads have been treacherous lately. Glad you made it through."
+    }
+  ]
+}
