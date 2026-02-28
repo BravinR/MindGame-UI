@@ -12,7 +12,7 @@
       "npcName": "John",
       "position": { "x": 25, "z": -15 },
       "completed": false,
-      "dialogue": "Ah, a Dragonborn! The roads have been treacherous lately. Glad you made it through."
+      "dialogue": "Ah, a traveler! The roads have been treacherous lately. Glad you made it through."
     },
     {
       "npcId": "mira-coldwell",

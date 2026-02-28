@@ -424,8 +424,8 @@ export default function App() {
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // --- Dragonborn Character ---
-    const createDragonborn = () => {
+    // --- Player Character ---
+    const createPlayerCharacter = () => {
       const group = new THREE.Group();
       const ironMat = new THREE.MeshStandardMaterial({ color: materials.character.iron, metalness: 0.8, roughness: 0.3 });
       const furMat = new THREE.MeshStandardMaterial({ color: materials.character.fur, roughness: 1.0 });
@@ -504,7 +504,7 @@ export default function App() {
       return group;
     };
 
-    const warrior = createDragonborn();
+    const warrior = createPlayerCharacter();
     warrior.position.set(0, 0, 0);
     scene.add(warrior);
 

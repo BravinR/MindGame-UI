@@ -1,17 +1,17 @@
 {
   "theme": {
-    "title": "SKYRIM",
-    "subtitle": "Tundra Echoes • Nordic Realm",
-    "era": "4E 211",
-    "eraLabel": "Fourth Era",
+    "title": "MINDGAME",
+    "subtitle": "Tundra Echoes",
+    "era": "Year 9",
+    "eraLabel": "Current Era",
     "atmosphereLabel": "Atmosphere",
     "atmosphereDescription": "Ten years have passed. The settlement has grown, a new temple stands where a simple home once was, and stone roads now pave the way through the frost."
   },
   "infoModal": {
-    "title": "Skyrim: A Decade of Growth",
+    "title": "A Decade of Growth",
     "paragraphs": [
-      "The passage of time has seen the tundra settlement evolve. What was once a small collection of huts has grown into a fortified outpost. The Nords have prospered, building a grand temple to the gods and paving roads to connect their people.",
-      "The air remains cold, but the fires of the hearth burn brighter than ever. The Dragonborn's legacy continues to inspire those who call this frozen land home."
+      "The passage of time has seen the tundra settlement evolve. What was once a small collection of huts has grown into a fortified outpost. The people have prospered, building a grand temple and paving roads to connect their community.",
+      "The air remains cold, but the fires of the hearth burn brighter than ever. The warrior's legacy continues to inspire those who call this frozen land home."
     ],
     "stats": [
       {
@@ -48,7 +48,7 @@
     "landmarks": [
       {
         "type": "temple",
-        "name": "Temple of Kynareth",
+        "name": "Grand Temple",
         "position": { "x": 0, "z": -40 },
         "color": "#f5f5f5"
       }

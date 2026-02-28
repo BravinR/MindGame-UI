@@ -16,14 +16,14 @@ Requires `GEMINI_API_KEY` set in `.env.local`.
 
 ## Architecture
 
-This is a single-page React + Three.js WebGL app ("Skyrim: Tundra Echoes") with no routing, no backend, and no state management library.
+This is a single-page React + Three.js WebGL app ("MindGame") with no routing, no backend, and no state management library.
 
 **Entry:** `index.html` → `src/main.tsx` → `src/App.tsx`
 
 **`src/App.tsx`** is the entire application. It has three parts:
 1. **`Overlay` component** — fixed HUD with title, controls hint, atmosphere description, era display.
 2. **`InfoModal` component** — animated modal (Framer Motion `AnimatePresence`) with lore text and stat cards.
-3. **`App` default export** — mounts a Three.js scene inside a `useEffect` on a `containerRef` div. All 3D scene logic lives here: scene setup, lighting, ground, character (Dragonborn), NPCs, trees, roads, Nordic buildings/towers, temples, keyboard input, and the animation loop.
+3. **`App` default export** — mounts a Three.js scene inside a `useEffect` on a `containerRef` div. All 3D scene logic lives here: scene setup, lighting, ground, player character, NPCs, trees, roads, buildings/towers, temples, keyboard input, and the animation loop.
 
 **`src/sceneConfig.json`** is the single source of truth for all scene parameters:
 - `theme` — UI text (title, subtitle, era, atmosphere)
