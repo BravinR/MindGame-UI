@@ -2,16 +2,28 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Info, Map as MapIcon, Wind, Compass, Landmark, History, Move, Users, Sun, Sword, Snowflake, Mountain } from 'lucide-react';
+import sceneConfig from './sceneConfig.json';
 
-// --- Constants & Types ---
-const CITY_SIZE = 250;
-const BUILDING_COUNT = 300;
-const TREE_COUNT = 150;
-const NPC_COUNT = 40;
+// --- Icon Mapping ---
+const IconMap: { [key: string]: React.ElementType } = {
+  Info,
+  MapIcon,
+  Wind,
+  Compass,
+  Landmark,
+  History,
+  Move,
+  Users,
+  Sun,
+  Sword,
+  Snowflake,
+  Mountain
+};
 
 // --- Components ---
 
 const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
+  const { theme } = sceneConfig;
   return (
     <div className="fixed inset-0 pointer-events-none flex flex-col justify-between p-8 z-10">
       <header className="flex justify-between items-start">
@@ -20,8 +32,8 @@ const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-1"
         >
-          <h1 className="font-display text-4xl tracking-widest text-slate-100 shadow-lg">SKYRIM</h1>
-          <p className="font-serif italic text-sm text-slate-300/80">Tundra Echoes • Nordic Realm</p>
+          <h1 className="font-display text-4xl tracking-widest text-slate-100 shadow-lg">{theme.title}</h1>
+          <p className="font-serif italic text-sm text-slate-300/80">{theme.subtitle}</p>
         </motion.div>
         
         <div className="flex gap-4 pointer-events-auto">
@@ -63,10 +75,10 @@ const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
         >
           <div className="flex items-center gap-2 text-slate-300 text-xs uppercase tracking-widest font-sans font-semibold">
             <Snowflake size={14} />
-            <span>Atmosphere</span>
+            <span>{theme.atmosphereLabel}</span>
           </div>
           <p className="text-xs text-slate-100/80 leading-relaxed">
-            The cold winds of the north howl through the ancient stone halls. A land of dragons, heroes, and eternal frost.
+            {theme.atmosphereDescription}
           </p>
         </motion.div>
 
@@ -75,8 +87,8 @@ const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
           animate={{ opacity: 1, x: 0 }}
           className="text-right space-y-1"
         >
-          <div className="text-4xl font-display text-slate-100/30 select-none tracking-tighter">4E 201</div>
-          <div className="text-[10px] tracking-[0.3em] uppercase text-slate-300/50">Fourth Era</div>
+          <div className="text-4xl font-display text-slate-100/30 select-none tracking-tighter">{theme.era}</div>
+          <div className="text-[10px] tracking-[0.3em] uppercase text-slate-300/50">{theme.eraLabel}</div>
         </motion.div>
       </footer>
     </div>
@@ -84,6 +96,7 @@ const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
 };
 
 const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const { infoModal } = sceneConfig;
   return (
     <AnimatePresence>
       {isOpen && (
@@ -108,38 +121,33 @@ const InfoModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
                 <Mountain size={32} />
               </div>
               <div className="space-y-4">
-                <h2 className="font-display text-3xl text-slate-50">The Realm of Skyrim</h2>
+                <h2 className="font-display text-3xl text-slate-50">{infoModal.title}</h2>
                 <div className="space-y-4 text-slate-100/90 font-serif leading-relaxed">
-                  <p>
-                    Skyrim is the northernmost province of Tamriel, a land of rugged mountains, icy tundras, and ancient Nordic ruins. It is the home of the Nords, a hardy people known for their resilience and martial prowess.
-                  </p>
-                  <p>
-                    From the bustling markets of Whiterun to the frozen docks of Windhelm, the province is steeped in history and myth. Ancient word walls and dragon mounds dot the landscape, remnants of a time when dragons ruled the skies.
-                  </p>
+                  {infoModal.paragraphs.map((p, i) => (
+                    <p key={i}>{p}</p>
+                  ))}
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 pt-4">
-                  <div className="p-4 border border-slate-500/30 rounded-lg bg-slate-500/10">
-                    <div className="flex items-center gap-2 text-slate-300 text-xs uppercase tracking-wider mb-1">
-                      <Sword size={14} />
-                      <span>Combat</span>
-                    </div>
-                    <p className="text-xs text-slate-100/60">Steel blades and iron shields of the Dragonborn.</p>
-                  </div>
-                  <div className="p-4 border border-slate-500/30 rounded-lg bg-slate-500/10">
-                    <div className="flex items-center gap-2 text-slate-300 text-xs uppercase tracking-wider mb-1">
-                      <Wind size={14} />
-                      <span>The Voice</span>
-                    </div>
-                    <p className="text-xs text-slate-100/60">Shouts that echo through the Throat of the World.</p>
-                  </div>
+                  {infoModal.stats.map((stat, i) => {
+                    const Icon = IconMap[stat.icon] || Info;
+                    return (
+                      <div key={i} className="p-4 border border-slate-500/30 rounded-lg bg-slate-500/10">
+                        <div className="flex items-center gap-2 text-slate-300 text-xs uppercase tracking-wider mb-1">
+                          <Icon size={14} />
+                          <span>{stat.label}</span>
+                        </div>
+                        <p className="text-xs text-slate-100/60">{stat.description}</p>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <button 
                   onClick={onClose}
                   className="mt-6 w-full py-3 bg-slate-700/40 hover:bg-slate-700/60 border border-slate-400/50 text-slate-50 font-display tracking-widest transition-all rounded-lg shadow-lg"
                 >
-                  RETURN TO THE TUNDRA
+                  {infoModal.buttonLabel}
                 </button>
               </div>
             </div>
@@ -158,11 +166,13 @@ export default function App() {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const { scene: sceneSettings, materials } = sceneConfig;
+
     // --- Scene Setup ---
     const scene = new THREE.Scene();
-    const skyColor = 0xaabbcc; // Cold blue-gray sky
-    scene.background = new THREE.Color(skyColor);
-    scene.fog = new THREE.FogExp2(skyColor, 0.006);
+    const skyColor = new THREE.Color(sceneSettings.skyColor);
+    scene.background = skyColor;
+    scene.fog = new THREE.FogExp2(skyColor, sceneSettings.fogDensity);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 40, 100);
@@ -174,10 +184,10 @@ export default function App() {
     containerRef.current.appendChild(renderer.domElement);
 
     // --- Lighting ---
-    const ambientLight = new THREE.AmbientLight(0xccddee, 1.2);
+    const ambientLight = new THREE.AmbientLight(sceneSettings.ambientLight.color, sceneSettings.ambientLight.intensity);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    const sunLight = new THREE.DirectionalLight(sceneSettings.sunLight.color, sceneSettings.sunLight.intensity);
     sunLight.position.set(50, 100, 50);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 2048;
@@ -193,7 +203,7 @@ export default function App() {
     // --- Ground ---
     const groundGeo = new THREE.PlaneGeometry(1000, 1000);
     const groundMat = new THREE.MeshStandardMaterial({ 
-      color: 0xeeeeee, // Snow
+      color: sceneSettings.groundColor,
       roughness: 0.9,
       metalness: 0.0
     });
@@ -205,9 +215,9 @@ export default function App() {
     // --- Dragonborn Character ---
     const createDragonborn = () => {
       const group = new THREE.Group();
-      const ironMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.8, roughness: 0.3 });
-      const furMat = new THREE.MeshStandardMaterial({ color: 0x4a3728, roughness: 1.0 });
-      const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac });
+      const ironMat = new THREE.MeshStandardMaterial({ color: materials.character.iron, metalness: 0.8, roughness: 0.3 });
+      const furMat = new THREE.MeshStandardMaterial({ color: materials.character.fur, roughness: 1.0 });
+      const skinMat = new THREE.MeshStandardMaterial({ color: materials.character.skin });
 
       // Body
       const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.6), furMat);
@@ -270,7 +280,7 @@ export default function App() {
 
       // Sword
       const swordGroup = new THREE.Group();
-      const blade = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.5, 0.05), new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.9 }));
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.5, 0.05), new THREE.MeshStandardMaterial({ color: materials.character.blade, metalness: 0.9 }));
       blade.position.y = 0.75;
       swordGroup.add(blade);
       const handle = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.1, 0.1), furMat);
@@ -299,7 +309,7 @@ export default function App() {
       body.castShadow = true;
       group.add(body);
       
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({ color: 0xffdbac }));
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({ color: materials.character.skin }));
       head.position.y = 1.6;
       head.castShadow = true;
       group.add(head);
@@ -307,21 +317,21 @@ export default function App() {
       return group;
     };
 
-    for (let i = 0; i < NPC_COUNT; i++) {
+    for (let i = 0; i < sceneSettings.npcCount; i++) {
       const npc = createNPC();
-      const x = (Math.random() - 0.5) * CITY_SIZE;
-      const z = (Math.random() - 0.5) * CITY_SIZE;
+      const x = (Math.random() - 0.5) * sceneSettings.citySize;
+      const z = (Math.random() - 0.5) * sceneSettings.citySize;
       npc.position.set(x, 0, z);
       scene.add(npc);
       npcs.push(npc);
-      npcTargets.push(new THREE.Vector3((Math.random() - 0.5) * CITY_SIZE, 0, (Math.random() - 0.5) * CITY_SIZE));
+      npcTargets.push(new THREE.Vector3((Math.random() - 0.5) * sceneSettings.citySize, 0, (Math.random() - 0.5) * sceneSettings.citySize));
     }
 
     // --- Pine Trees ---
     const createTree = (x: number, z: number) => {
       const group = new THREE.Group();
-      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x3d2b1f });
-      const leavesMat = new THREE.MeshStandardMaterial({ color: 0x1a2e1a });
+      const trunkMat = new THREE.MeshStandardMaterial({ color: materials.environment.trunk });
+      const leavesMat = new THREE.MeshStandardMaterial({ color: materials.environment.leaves });
 
       const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 4, 8), trunkMat);
       trunk.position.y = 2;
@@ -339,9 +349,9 @@ export default function App() {
       scene.add(group);
     };
 
-    for (let i = 0; i < TREE_COUNT; i++) {
-      const x = (Math.random() - 0.5) * CITY_SIZE * 1.5;
-      const z = (Math.random() - 0.5) * CITY_SIZE * 1.5;
+    for (let i = 0; i < sceneSettings.treeCount; i++) {
+      const x = (Math.random() - 0.5) * sceneSettings.citySize * 1.5;
+      const z = (Math.random() - 0.5) * sceneSettings.citySize * 1.5;
       if (Math.sqrt(x*x + z*z) < 40) continue;
       createTree(x, z);
     }
@@ -350,9 +360,9 @@ export default function App() {
     const buildingGroup = new THREE.Group();
     scene.add(buildingGroup);
 
-    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 });
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0x4b3621, roughness: 0.8 });
-    const roofMat = new THREE.MeshStandardMaterial({ color: 0x111111 }); // Slate/Dark Thatch
+    const stoneMat = new THREE.MeshStandardMaterial({ color: materials.buildings.stone, roughness: 0.9 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: materials.buildings.wood, roughness: 0.8 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: materials.buildings.roof }); // Slate/Dark Thatch
 
     const createNordicHouse = (x: number, z: number) => {
       const h = 8 + Math.random() * 12;
@@ -394,9 +404,9 @@ export default function App() {
       buildingGroup.add(tower, top);
     };
 
-    for (let i = 0; i < BUILDING_COUNT; i++) {
-      const x = (Math.random() - 0.5) * CITY_SIZE;
-      const z = (Math.random() - 0.5) * CITY_SIZE;
+    for (let i = 0; i < sceneSettings.buildingCount; i++) {
+      const x = (Math.random() - 0.5) * sceneSettings.citySize;
+      const z = (Math.random() - 0.5) * sceneSettings.citySize;
       if (Math.sqrt(x*x + z*z) < 30) continue;
       if (Math.random() > 0.9) createNordicTower(x, z);
       else createNordicHouse(x, z);
@@ -429,7 +439,7 @@ export default function App() {
         npc.position.add(dir.multiplyScalar(0.08));
         npc.lookAt(target);
         if (npc.position.distanceTo(target) < 1) {
-          npcTargets[i] = new THREE.Vector3((Math.random() - 0.5) * CITY_SIZE, 0, (Math.random() - 0.5) * CITY_SIZE);
+          npcTargets[i] = new THREE.Vector3((Math.random() - 0.5) * sceneSettings.citySize, 0, (Math.random() - 0.5) * sceneSettings.citySize);
         }
       });
 
@@ -471,12 +481,22 @@ export default function App() {
       <InfoModal isOpen={showInfo} onClose={() => setShowInfo(false)} />
 
       {/* Cold Vignette effect */}
-      <div className="fixed inset-0 pointer-events-none shadow-[inset_0_0_200px_rgba(30,50,80,0.4)]" />
+      <div 
+        className="fixed inset-0 pointer-events-none" 
+        style={{ boxShadow: `inset 0 0 200px ${sceneConfig.vignette}` }}
+      />
       
       {/* Snow particles simulation (CSS) */}
-      <div className="fixed inset-0 pointer-events-none opacity-40">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.8)_1px,_transparent_1px)] bg-[length:30px_30px] animate-[pulse_5s_infinite]" />
+      <div className="fixed inset-0 pointer-events-none" style={{ opacity: sceneConfig.particles.opacity }}>
+        <div 
+          className="absolute inset-0 animate-[pulse_5s_infinite]" 
+          style={{ 
+            backgroundImage: `radial-gradient(circle at center, ${sceneConfig.particles.color} 1px, transparent 1px)`,
+            backgroundSize: `${sceneConfig.particles.size} ${sceneConfig.particles.size}`
+          }}
+        />
       </div>
     </div>
   );
 }
+
