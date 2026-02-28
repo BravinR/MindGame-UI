@@ -364,6 +364,75 @@ export default function App() {
     const woodMat = new THREE.MeshStandardMaterial({ color: materials.buildings.wood, roughness: 0.8 });
     const roofMat = new THREE.MeshStandardMaterial({ color: materials.buildings.roof }); // Slate/Dark Thatch
 
+    // --- Roads ---
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 1.0 });
+    const roads = sceneConfig.worldState?.roads || [];
+    roads.forEach((road: any) => {
+      const start = new THREE.Vector3(road.start.x, 0.05, road.start.z);
+      const end = new THREE.Vector3(road.end.x, 0.05, road.end.z);
+      const distance = start.distanceTo(end);
+      const roadGeo = new THREE.PlaneGeometry(road.width, distance);
+      const roadMesh = new THREE.Mesh(roadGeo, roadMat);
+      
+      const midpoint = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+      roadMesh.position.set(midpoint.x, 0.05, midpoint.z);
+      roadMesh.rotation.x = -Math.PI / 2;
+      
+      // Rotate road to align with start/end
+      const angle = Math.atan2(end.x - start.x, end.z - start.z);
+      roadMesh.rotation.z = angle;
+      
+      roadMesh.receiveShadow = true;
+      scene.add(roadMesh);
+    });
+
+    // --- Landmarks ---
+    const createTemple = (x: number, z: number, color: string) => {
+      const templeGroup = new THREE.Group();
+      const tStoneMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.7 });
+      
+      // Base
+      const base = new THREE.Mesh(new THREE.BoxGeometry(12, 2, 12), tStoneMat);
+      base.position.y = 1;
+      base.castShadow = true;
+      base.receiveShadow = true;
+      templeGroup.add(base);
+
+      // Pillars
+      const pillarGeo = new THREE.CylinderGeometry(0.5, 0.5, 8, 8);
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+          if (i === 0 && j === 0) continue;
+          const pillar = new THREE.Mesh(pillarGeo, tStoneMat);
+          pillar.position.set(i * 4.5, 6, j * 4.5);
+          pillar.castShadow = true;
+          templeGroup.add(pillar);
+        }
+      }
+
+      // Roof
+      const tRoof = new THREE.Mesh(new THREE.BoxGeometry(14, 2, 14), tStoneMat);
+      tRoof.position.y = 10.5;
+      tRoof.castShadow = true;
+      templeGroup.add(tRoof);
+
+      const spire = new THREE.Mesh(new THREE.ConeGeometry(4, 8, 4), tStoneMat);
+      spire.position.y = 15.5;
+      spire.rotation.y = Math.PI / 4;
+      spire.castShadow = true;
+      templeGroup.add(spire);
+
+      templeGroup.position.set(x, 0, z);
+      buildingGroup.add(templeGroup);
+    };
+
+    const landmarks = sceneConfig.worldState?.landmarks || [];
+    landmarks.forEach((landmark: any) => {
+      if (landmark.type === 'temple') {
+        createTemple(landmark.position.x, landmark.position.z, landmark.color);
+      }
+    });
+
     const createNordicHouse = (x: number, z: number) => {
       const h = 8 + Math.random() * 12;
       const w = 6 + Math.random() * 4;
@@ -404,10 +473,37 @@ export default function App() {
       buildingGroup.add(tower, top);
     };
 
+    const isOnRoadOrLandmark = (x: number, z: number) => {
+      // Check roads
+      for (const road of roads) {
+        const start = new THREE.Vector2(road.start.x, road.start.z);
+        const end = new THREE.Vector2(road.end.x, road.end.z);
+        const p = new THREE.Vector2(x, z);
+        
+        const line = new THREE.Vector2().subVectors(end, start);
+        const lenSq = line.lengthSq();
+        const t = Math.max(0, Math.min(1, new THREE.Vector2().subVectors(p, start).dot(line) / lenSq));
+        const projection = start.clone().add(line.multiplyScalar(t));
+        const dist = p.distanceTo(projection);
+        
+        if (dist < road.width / 2 + 5) return true;
+      }
+      
+      // Check landmarks
+      for (const landmark of landmarks) {
+        const dist = Math.sqrt(Math.pow(x - landmark.position.x, 2) + Math.pow(z - landmark.position.z, 2));
+        if (dist < 15) return true;
+      }
+      
+      return false;
+    };
+
     for (let i = 0; i < sceneSettings.buildingCount; i++) {
       const x = (Math.random() - 0.5) * sceneSettings.citySize;
       const z = (Math.random() - 0.5) * sceneSettings.citySize;
       if (Math.sqrt(x*x + z*z) < 30) continue;
+      if (isOnRoadOrLandmark(x, z)) continue;
+      
       if (Math.random() > 0.9) createNordicTower(x, z);
       else createNordicHouse(x, z);
     }
