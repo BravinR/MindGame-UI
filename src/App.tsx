@@ -46,6 +46,10 @@ const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
             <span className="px-2 py-1 border border-slate-400/40 rounded bg-slate-400/20">A</span>
             <span className="px-2 py-1 border border-slate-400/40 rounded bg-slate-400/20">S</span>
             <span className="px-2 py-1 border border-slate-400/40 rounded bg-slate-400/20">D</span>
+            <span className="px-2 py-1 border border-slate-400/40 rounded bg-slate-400/20 ml-2">↑</span>
+            <span className="px-2 py-1 border border-slate-400/40 rounded bg-slate-400/20">←</span>
+            <span className="px-2 py-1 border border-slate-400/40 rounded bg-slate-400/20">↓</span>
+            <span className="px-2 py-1 border border-slate-400/40 rounded bg-slate-400/20">→</span>
           </div>
           <span>to Roam the Tundra</span>
         </motion.div>
@@ -413,10 +417,10 @@ export default function App() {
       requestAnimationFrame(animate);
 
       // Movement
-      if (keys.current['w']) warrior.translateZ(moveSpeed);
-      if (keys.current['s']) warrior.translateZ(-moveSpeed);
-      if (keys.current['a']) warrior.rotation.y += rotateSpeed;
-      if (keys.current['d']) warrior.rotation.y -= rotateSpeed;
+      if (keys.current['w'] || keys.current['arrowup']) warrior.translateZ(moveSpeed);
+      if (keys.current['s'] || keys.current['arrowdown']) warrior.translateZ(-moveSpeed);
+      if (keys.current['a'] || keys.current['arrowleft']) warrior.rotation.y += rotateSpeed;
+      if (keys.current['d'] || keys.current['arrowright']) warrior.rotation.y -= rotateSpeed;
 
       // NPC Movement
       npcs.forEach((npc, i) => {
