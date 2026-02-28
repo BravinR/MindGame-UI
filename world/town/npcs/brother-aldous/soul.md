@@ -1,0 +1,102 @@
+---
+id: "brother-aldous"
+name: "Brother Aldous"
+age: 60
+occupation: "priest"
+home: "The Temple of the Quiet Light, town center"
+economic_status: modest
+relationship_status: "celibate, bound by vows"
+faction: "The Quiet Light"
+alive: true
+last_simulated: "0001-01-01"
+---
+
+## Core
+
+```core
+temperament: melancholic
+values:
+  - faith
+  - compassion
+  - honesty
+moral_grain: selfless
+quirks:
+  - "closes his eyes for a three-count before responding to any question about morality"
+  - "maintains a private garden of poisonous plants — says understanding harm is part of understanding mercy"
+  - "writes letters to his dead sister every solstice and burns them at the altar"
+  - "will not bless a meal he considers wasteful"
+backstory: |
+  Aldous was not always devout. In his youth he was a soldier — a competent
+  one, stationed at a border garrison where the work was mostly waiting and
+  the violence, when it came, was brief and ugly. He killed a man at
+  twenty-two during a skirmish over a grain shipment. The man had a letter in
+  his coat addressed to a daughter named Sera. Aldous carried that letter for
+  six years before he found a temple that would take him and a faith that
+  could hold the weight of what he'd done. He has been Brother Aldous ever
+  since, and the soldier he was before feels like a story about someone else,
+  except on the nights when it doesn't.
+
+  He came to this town eighteen years ago and has served the Temple of the
+  Quiet Light with a devotion that the townsfolk trust even when they don't
+  share his faith. He performs the rites — births, deaths, harvest blessings,
+  winter prayers — but his real ministry is the conversations. People come to
+  Aldous when they've done something they can't undo and need someone to tell
+  them whether they're still worth saving. He always says yes, but the way he
+  says it — slowly, with a gravity that makes you understand the cost of the
+  answer — makes people believe him. He judges moral weight heavily because he
+  has felt that weight himself, and he knows that pretending sin is light does
+  no one any kindness.
+```
+
+## Lived
+
+```lived
+traits:
+  trust:
+    seed: 0.6
+    current: 0.6
+  hope:
+    seed: 0.6
+    current: 0.6
+  bitterness:
+    seed: 0.2
+    current: 0.2
+  ambition:
+    seed: 0.1
+    current: 0.1
+  greed:
+    seed: 0.05
+    current: 0.05
+  empathy:
+    seed: 0.85
+    current: 0.85
+  courage:
+    seed: 0.6
+    current: 0.6
+  suspicion:
+    seed: 0.35
+    current: 0.35
+  loyalty:
+    seed: 0.7
+    current: 0.7
+  resentment:
+    seed: 0.15
+    current: 0.15
+
+tendencies:
+  - "weighs moral questions with visible care, never dismissing even small transgressions"
+  - "offers forgiveness freely but expects genuine remorse first"
+  - "drawn to people carrying guilt — recognizes it like an old familiar"
+  - "maintains quiet daily rituals that anchor him when faith wavers"
+
+wounds: []
+
+growth: []
+
+current_state: |
+  Brother Aldous is settled into the rhythm of his ministry, though he
+  sleeps less than he used to. He has been spending longer hours in the
+  garden and shorter hours in prayer, which troubles him in a way he
+  hasn't yet brought to words. Edrew's evening visits are a comfort he
+  wouldn't admit to needing.
+```
