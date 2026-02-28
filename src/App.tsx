@@ -30,32 +30,32 @@ const Overlay = ({ onToggleInfo }: { onToggleInfo: () => void }) => {
   const { theme } = sceneConfig;
   return (
     <div className="fixed inset-0 pointer-events-none flex flex-col justify-between p-8 z-10">
-      <header className="flex justify-between items-start">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-1"
-        >
-          <h1 className="font-display text-4xl tracking-widest text-slate-100 shadow-lg">{theme.title}</h1>
-          <p className="font-serif italic text-sm text-slate-300/80">{theme.subtitle}</p>
-        </motion.div>
-
-        <div className="flex gap-4 pointer-events-auto">
-          <button
-            onClick={onToggleInfo}
-            className="p-3 rounded-full glass-panel hover:bg-slate-700/40 transition-colors text-slate-100/90 border-slate-500/30"
+      <div>
+        <header className="flex justify-between items-start">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-1"
           >
-            <Info size={20} />
-          </button>
-        </div>
-      </header>
+            <h1 className="font-display text-4xl tracking-widest text-slate-100 shadow-lg">{theme.title}</h1>
+            <p className="font-serif italic text-sm text-slate-300/80">{theme.subtitle}</p>
+          </motion.div>
 
-      <div className="flex flex-col items-center justify-center flex-1">
+          <div className="flex gap-4 pointer-events-auto">
+            <button
+              onClick={onToggleInfo}
+              className="p-3 rounded-full glass-panel hover:bg-slate-700/40 transition-colors text-slate-100/90 border-slate-500/30"
+            >
+              <Info size={20} />
+            </button>
+          </div>
+        </header>
+
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1 }}
-          className="glass-panel px-6 py-3 rounded-full flex items-center gap-4 text-slate-100/80 text-xs tracking-[0.2em] uppercase font-sans border-slate-500/30"
+          className="glass-panel px-6 py-3 rounded-full flex items-center gap-4 text-slate-100/80 text-xs tracking-[0.2em] uppercase font-sans border-slate-500/30 w-fit mx-auto mt-4"
         >
           <div className="flex gap-1">
             <span className="px-2 py-1 border border-slate-400/40 rounded bg-slate-400/20">W</span>
